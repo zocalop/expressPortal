@@ -1,22 +1,19 @@
 
-//import Express.js library
 const express = require('express');
-
-const path = require("path");
-
-//create instance of an Express app
+const routes = require('./routes/users.js');
 const app = express();
+const PORT = 5000;
 
-const port = 8080;
+const Database = require('better-sqlite3');
+const db = new Database('users.db');
 
-//Serve react production build
-app.use(express.static(path.join("C:/Users/Familia/Desktop/expressPortal", "dist")));
+const cors = require('cors');
 
-//Send react's index.html for routes that aren't api routes
-app.get("/{*splat}", (req,res) => {
-  res.sendFile(path.join("C:/Users/Familia/Desktop/expressPortal", "dist", "index.html"));
-});
+// Use JSON parsing middleware and user routes
+app.use(cors());
+app.use(express.json());
+app.use("/user", routes);
 
-app.listen(port, () => {
-  console.log(`Listening on URL https://localhost:${port}`);
-});
+app.listen(PORT, () => console.log("Server is running at port " + PORT));
+
+module.exports = db;
