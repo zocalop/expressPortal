@@ -1,22 +1,19 @@
 
-//import Express.js library
 const express = require('express');
-
-const path = require("path");
-
-//create instance of an Express app
+const routes = require('./routes/users.js');
 const app = express();
+const PORT = 5000;
 
-const port = 8080;
+const cors = require('cors');
 
-//Serve react production build
-app.use(express.static(path.join("C:/Users/Familia/Desktop/expressPortal", "dist")));
+// Use cors for frontend access to backend resources when on different domains
+app.use(cors());
+app.use(express.json());
+app.use("/user", routes);
 
-//Send react's index.html for routes that aren't api routes
-app.get("/{*splat}", (req,res) => {
-  res.sendFile(path.join("C:/Users/Familia/Desktop/expressPortal", "dist", "index.html"));
-});
+// Only start this server when this file is run directly.
+if (require.main === module) {
+  app.listen(PORT, () => console.log("Server is running at port " + PORT));
+}
 
-app.listen(port, () => {
-  console.log(`Listening on URL https://localhost:${port}`);
-});
+module.exports = app;
