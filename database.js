@@ -1,6 +1,8 @@
 
 const Database = require('better-sqlite3');
-const db = new Database('users.db');
+const db = new Database(
+  process.env.NODE_ENV === 'test' ? ':memory:' : 'users.db'
+);
 
 db.pragma('foreign_keys = ON');
 
