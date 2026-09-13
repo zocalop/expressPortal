@@ -23,13 +23,13 @@ app.use("/user", (req, res, next) => {
         req.user = user;  // Set authenticated user data on the req object
         next();  // Proceed to the next middleware
       } else {
-        return res.status(403).json({ message: "User not authenticated" });  // Return error if token verification fails
+        return res.status(403).send("User not authenticated");  // Return error if token verification fails
       }
     });
 
   // Return error if no access token is found in the session
   } else {
-    return rest.status(403).json({ message: "User not logged in" });
+    return res.status(403).send("User not logged in");
   }
 });
 
@@ -43,7 +43,7 @@ app.use("/regsister", unauth);
 app.post("/login", (req, res) => {
   const user = req.body.user
   if (!user) {
-    return res.status(404).json({ message: "Body Empty" }):
+    return res.status(404).send("Body Empty");
   }
   // Generate JWT access token
   let accessToken = jwt.sign({
