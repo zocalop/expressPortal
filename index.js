@@ -7,6 +7,7 @@ const PORT = 5000;
 const cors = require('cors');
 const session = require('express-session');
 const jwt = require('jsonwebtoken');
+const db = require('./database');
 
 //Initialize session middleware with options
 app.use(session({ secret: "magic_rune", resave: true, saveUninitialized: true }));
@@ -37,14 +38,33 @@ app.use("/user", (req, res, next) => {
 app.use(cors());
 app.use(express.json());
 app.use("/user", routes);
-app.use("/regsister", unauth);
+app.use("/register", unauth);
 
 // Login endpoint
 app.post("/login", (req, res) => {
-  const user = req.body.user
-  if (!user) {
-    return res.status(404).send("Body Empty");
+  const username = req.body.username
+  const password = req.body.password
+  if (!username) {
+    return res.status(404).send("Enter Username");
   }
+  if (!password) {
+    return res.status(404).send("Enter Password");
+  }
+
+  // Retrieve user from db
+  const user = db
+    .prepare("SELECT id FROM users WHERE id = ?")
+    .get(username);
+  if (!user) {
+    return res.status(404).send("Username not found");
+  }
+  const pass = db
+    .prepare("SELECT id FROM users WHERE id = ? AND lastName = ?")
+    .get(username, password);
+  if (!pass) {
+    return res.status(404).send("Password not found");
+  }
+
   // Generate JWT access token
   let accessToken = jwt.sign({
     data: user
