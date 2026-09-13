@@ -4,65 +4,6 @@ const router = express.Router();
 
 const db = require('../database');
 
-/*const fs = require('fs');
-let users = JSON.parse(
-  fs.readFileSync('./routes/users.json', 'utf8')
-);*/
-
-// POST: Create user
-router.post("/", (req, res) => {
-
-/*const newId = users.length > 0
-    ? Math.max(...users.map(user => user.id)) + 1
-    : 1;
-
-  const newUser = {
-    id: newId,
-    firstName: req.query.firstName,
-    lastName: req.query.lastName,
-    cart: req.body.cart
-  };
-
-  users.push(newUser);
-
-  fs.writeFileSync(
-    './routes/users.json',
-    JSON.stringify(users, null, 2)
-  );*/
-
-  const { firstName, lastName } = req.query;
-  const cart = req.body.cart || [];
-
-  const insertUser = db.prepare(`
-    INSERT INTO users (firstName, lastName)
-    VALUES (?, ?)
-  `);
-  const result = insertUser.run(firstName, lastName);
-  const userId = result.lastInsertRowid;
-  const newUser = db.prepare(`
-    SELECT *
-    FROM users
-    WHERE id = ?
-  `).get(userId);
-
-  const insertCartItem = db.prepare(`
-    INSERT INTO cart_items (user_id, product_name, quantity)
-    VALUES (?, ?, ?)
-  `);
-  const addCartItems = db.transaction((cart) => {
-    for (const item of cart) {
-      insertCartItem.run(
-        userId,
-        item.product_name,
-        item.quantity
-      );
-    }
-  });
-  addCartItems(cart);
-
-  res.status(201).json(newUser);
-});
-
 // GET request: Retrieve all users without cart
 router.get("/", (req, res) => {
   const users = db.prepare('SELECT * FROM users').all();
