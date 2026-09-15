@@ -9,6 +9,14 @@ const session = require('express-session');
 const jwt = require('jsonwebtoken');
 const db = require('./database');
 
+// Use cors for frontend access to backend resources when on different domains
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true
+}));
+
+app.use(express.json());
+
 //Initialize session middleware with options
 app.use(session({ secret: "magic_rune", resave: true, saveUninitialized: true }));
 
@@ -34,9 +42,6 @@ app.use("/user", (req, res, next) => {
   }
 });
 
-// Use cors for frontend access to backend resources when on different domains
-app.use(cors());
-app.use(express.json());
 app.use("/user", routes);
 app.use("/register", unauth);
 
@@ -64,10 +69,11 @@ app.post("/login", (req, res) => {
   if (!pass) {
     return res.status(404).send("Password not found");
   }
+  const user_id = user.id;
 
   // Generate JWT access token
   let accessToken = jwt.sign({
-    data: user
+    user_id: user_id
   }, 'access', { expiresIn: 60 * 60 });
 
   // Store access token in session

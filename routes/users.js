@@ -10,59 +10,29 @@ router.get("/", (req, res) => {
   res.send(users);
 });
 
-// GET request: Retrieve one user with Cart
-router.get("/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const user = db.prepare(`
-    SELECT id, firstName, lastName
-    FROM users
-    WHERE id = ?
-  `).get(id);
-  if (!user) {
-    return res.status(404).send(
-      "You have no history here, Stranger."
-    );
-  }
+// GET request: Retrieve one user's Cart
+router.get("/cart", (req, res) => {
+  const user_id = req.user.user_id;
 
   const cart = db.prepare(`
     SELECT product_name, quantity
     FROM cart_items
     WHERE user_id = ?
-  `).all(id);
+  `).all(user_id);
 
-  user.cart = cart;
-
-  res.json(user);
+  res.json(cart);
 });
 
 // PUT request: Update user cart
-router.put("/:id", (req, res) => {
-  const id = Number(req.params.id);
-
-/*let filtered_users = users.filter((user) => user.id === id);
-  if (filtered_users.length > 0) {
-    let filtered_user = filtered_users[0];
-    let cart = req.body.cart;
-    if (cart) {
-      filtered_user.cart = cart;
-    }
-    users = users.filter((user) => user.id != id);
-    users.push(filtered_user);
-    fs.writeFileSync(
-      './routes/users.json',
-      JSON.stringify(users, null, 2)
-    );
-    res.status(201).json(filtered_user);
-  } else {
-    res.send("You have no history here, stranger.");
-  }*/
+router.put("/cart", (req, res) => {
+  const user_id = req.user.user_id;
 
   const cart = req.body.cart || [];
   const user = db.prepare(`
     SELECT *
     FROM users
     WHERE id = ?
-  `).get(id);
+  `).get(user_id);
   if (!user) {
     return res.status(404).send(
       "You have no history here, Stranger."
@@ -72,7 +42,7 @@ router.put("/:id", (req, res) => {
   db.prepare(`
     DELETE FROM cart_items
     WHERE user_id = ?
-  `).run(id);
+  `).run(user_id);
 
   const insertCartItem = db.prepare(`
     INSERT INTO cart_items (user_id, product_name, quantity)
@@ -82,7 +52,7 @@ router.put("/:id", (req, res) => {
   const updateCart = db.transaction((cart) => {
     for (const item of cart) {
       insertCartItem.run(
-        id,
+        user_id,
         item.product_name,
         item.quantity
       );
@@ -94,7 +64,7 @@ router.put("/:id", (req, res) => {
     SELECT product_name, quantity
     FROM cart_items
     WHERE user_id = ?
-  `).all(id);
+  `).all(user_id);
    user.cart = updatedCart;
 
   res.status(200).json(user);
