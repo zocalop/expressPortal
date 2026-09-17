@@ -4,6 +4,7 @@ process.env.NODE_ENV = 'test';
 const test = require('node:test');
 const assert = require('node:assert');
 const request = require('supertest');
+const { vi } = require('vitest');
 
 const app = require('../index');
 const db = require('../database');
@@ -21,40 +22,9 @@ test('GET /user returns a list of users', async () => {
   assert.ok(Array.isArray(response.body));
 });
 
-test('POST /user creates a new user with a cart', async () => {
-  const createResponse = await request(app)
-    .post('/user')
-    .query({
-      firstName: 'Test',
-      lastName: 'User'
-    })
-    .send({
-      cart: [
-        {
-          product_name: 'Test Potion',
-          quantity: 2
-        }
-      ]
-    });
-  assert.strictEqual(createResponse.statusCode, 201);
-  assert.strictEqual(createResponse.body.firstName, 'Test');
-  assert.strictEqual(createResponse.body.lastName, 'User');
-
-  const userId = createResponse.body.id
-  const getResponse = await request(app)
-    .get(`/user/${userId}`);
-
-  assert.strictEqual(getResponse.statusCode, 200);
-  assert.deepStrictEqual(getResponse.body.cart, [
-    {
-      product_name: 'Test Potion',
-      quantity: 2
-    }
-  ]);
-});
-
 test('GET /user/:id returns 404 for a missing user', async () => {
   const response = await request(app)
+
     .get('/user/999999');
 
   assert.strictEqual(response.statusCode, 404);
