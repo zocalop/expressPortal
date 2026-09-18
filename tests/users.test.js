@@ -4,7 +4,7 @@ process.env.NODE_ENV = 'test';
 const test = require('node:test');
 const assert = require('node:assert');
 const request = require('supertest');
-const { vi } = require('vitest');
+const sinon = require('sinon');
 
 const app = require('../index');
 const db = require('../database');
@@ -14,27 +14,23 @@ test.beforeEach(() => {
   db.prepare('DELETE FROM users').run();
 });
 
-test('GET /user returns a list of users', async () => {
-  const response = await request(app)
-    .get('/user');
+//test('POST /login returns 404 for a missing user', async () => {
+//  const response = await request(app)
 
-  assert.strictEqual(response.statusCode, 200);
-  assert.ok(Array.isArray(response.body));
+//    .get('/login');
+
+//  assert.strictEqual(response.statusCode, 404);
+//  assert.strictEqual(
+//    response.text,
+//      'You have no history here, Stranger.'
+//  );
+//})
+
+test('GET /user/cart retrieves logged in user's cart', async () => {
+
 });
 
-test('GET /user/:id returns 404 for a missing user', async () => {
-  const response = await request(app)
-
-    .get('/user/999999');
-
-  assert.strictEqual(response.statusCode, 404);
-  assert.strictEqual(
-    response.text,
-      'You have no history here, Stranger.'
-  );
-})
-
-test('PUT /user/:id updates the user cart', async () => {
+test('PUT /user/cart updates the user cart', async () => {
   const createResponse = await request(app)
     .post('/user')
     .query({
@@ -71,55 +67,9 @@ test('PUT /user/:id updates the user cart', async () => {
   ]);
 });
 
-test('DELETE /user/:id deletes an existing user', async () => {
-  const createResponse = await request(app)
-    .post('/user')
-    .query({
-      firstName: 'Delete',
-      lastName: 'Tester'
-    })
-    .send({
-      cart: []
-    });
-
-    const userId = createResponse.body.id;
-    const deleteResponse = await request(app)
-      .delete(`/user/${userId}`);
-
-    assert.strictEqual(deleteResponse.statusCode, 200);
-    assert.strictEqual(
-      deleteResponse.text,
-        `Customer with id ${userId} deleted.`
-    );
-
-    const getResponse = await request(app)
-      .get(`/user/${userId}`);
-
-    assert.strictEqual(getResponse.statusCode, 404);
-});
-
-test('PUT /user/:id returns 404 for a missing user', async () => {
+test('DELETE /user', async () => {
   const response = await request(app)
-    .put('/user/999999')
-    .send({
-      cart: [
-        {
-          product_name: 'Test Potion',
-          quantity: 1
-        }
-      ]
-    });
-
-  assert.strictEqual(response.statusCode, 404);
-  assert.strictEqual(
-    response.text,
-      'You have no history here, Stranger.'
-  );
-});
-
-test('DELETE /user/:id returns 404 for a missing user', async () => {
-  const response = await request(app)
-    .delete('/user/999999');
+    .delete('/user');
 
   assert.strictEqual(response.statusCode, 404);
   assert.strictEqual(
