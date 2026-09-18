@@ -14,26 +14,50 @@ test.beforeEach(() => {
 });
 
 test('registers a user, logs in, authenticates, and retrieves a list of all users', async () => {
-  const user = db.prepare(`
-    INSERT INTO users (firstName, lastName)
-    VALUES (?, ?)
-  `).run('Test', 'User');
+//  const user = db.prepare(`
+//    INSERT INTO users (firstName, lastName)
+//    VALUES (?, ?)
+//  `).run('Test', 'User');
 
   const agent = request.agent(app);
 
-  await agent
-    .post('/login')
+  const createResponse = await agent
+    .post('/register')
+    .query({
+      firstName: 'Booger',
+      lastName: 'Fatpickle'
+    })
     .send({
-      username: user.lastInsertRowid,
-      password: 'User'
+      cart: [
+        {
+          product_name: 'Weiner Potion',
+          quantity: 1
+        }
+      ]
     });
 
-  const response = await agent
-    .get('/user');
+  assert.strictEqual(createResponse.statusCode, 201);
 
-  assert.strictEqual(response.statusCode, 200);
-  assert.ok(Array.isArray(response.body));
+  const userId = createResponse.body.id;
+  const pass = createResponse.body.lastName;
 
-  const userId = user.id
+  const loginResponse = await agent
+    .post('/login')
+    .send({
+      username: userId,
+      password: pass
+    });
 
+  assert.strictEqual(loginResponse.statusCode, 200);
+
+  const cartResponse = await agent
+    .get('/user/cart');
+
+  assert.strictEqual(cartResponse.statusCode, 200);
+  assert.deepStrictEqual(cartResponse.body, [
+    {
+      product_name: 'Weiner Potion',
+      quantity: 1
+    }
+  ]);
 });
