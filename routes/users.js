@@ -28,16 +28,6 @@ router.put("/cart", (req, res) => {
   const user_id = req.user.user_id;
 
   const cart = req.body.cart || [];
-  const user = db.prepare(`
-    SELECT *
-    FROM users
-    WHERE id = ?
-  `).get(user_id);
-  if (!user) {
-    return res.status(404).send(
-      "You have no history here, Stranger."
-    );
-  }
 
   db.prepare(`
     DELETE FROM cart_items
@@ -59,15 +49,14 @@ router.put("/cart", (req, res) => {
     }
   });
   updateCart(cart);
-  
+
   const updatedCart = db.prepare(`
     SELECT product_name, quantity
     FROM cart_items
     WHERE user_id = ?
   `).all(user_id);
-   user.cart = updatedCart;
 
-  res.status(200).json(user);
+  res.status(200).json(updatedCart);
 });
 
 // DELETE request: Delete user

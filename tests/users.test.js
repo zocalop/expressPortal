@@ -85,12 +85,12 @@ test('PUT /user/cart updates the user cart', async () => {
     });
 
   assert.strictEqual(createResponse.statusCode, 200);
-  assert.deepStrictEqual(createResponse.body.cart, [
+  assert.deepStrictEqual(createResponse.body, [
     {
       product_name: 'Old Potion',
       quantity: 3
     }
-  ]);
+  ])
 
   const updateResponse = await request(app)
     .put('/user/cart')
@@ -103,8 +103,9 @@ test('PUT /user/cart updates the user cart', async () => {
       ]
     });
 
+  console.log(updateResponse.text);
   assert.strictEqual(updateResponse.statusCode, 200);
-  assert.deepStrictEqual(updateResponse.body.cart, [
+  assert.deepStrictEqual(updateResponse.body, [
     {
       product_name: 'New Potion',
       quantity: 1
