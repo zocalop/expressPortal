@@ -71,8 +71,8 @@ router.put("/cart", (req, res) => {
 });
 
 // DELETE request: Delete user
-router.delete("/:id", (req, res) => {
-  const id = Number(req.params.id);
+router.delete("/", (req, res) => {
+  const id = req.user.user_id
   const result = db.prepare(`
     DELETE FROM users
     WHERE id = ?
