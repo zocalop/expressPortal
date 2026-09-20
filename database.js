@@ -23,6 +23,18 @@ db.exec(`
       REFERENCES users(id)
       ON DELETE CASCADE
   );
+
+  CREATE TABLE IF NOT EXISTS stranger_inventory (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    product_name TEXT NOT NULL,
+    quantity INTEGER NOT NULL DEFAULT 1,
+
+    FOREIGN KEY (user_id)
+      REFERENCES users(id)
+      ON DELETE CASCADE
+  );
+
 `);
 
 module.exports = db;
