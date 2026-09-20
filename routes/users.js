@@ -76,4 +76,41 @@ router.delete("/", (req, res) => {
   );
 });
 
+// PUT request: send cart_items to stranger_inventory
+router.put("/si", (req, res) => {
+  const user_id = req.user.user_id;
+
+  const si = req.body.si || [];
+
+  db.prepare(`
+    DELETE FROM stranger_inventory
+    WHERE user_id = ?
+  `).run(user_id);
+
+  const insertSIItem = db.prepare(`
+    INSERT INTO stranger_inventory (user_id, product_name, quantity)
+    VALUES (?, ?, ?)
+  `);
+
+  const updateSI = db.transaction((si) => {
+    for (const item of si) {
+      insertSIItem.run(
+        user_id,
+        item.product_name,
+        item.quantity
+      );
+    }
+  });
+  updateSI(si);
+
+  const updatedSI = db.prepare(`
+    SELECT product_name, quantity
+    FROM stranger_inventory
+    WHERE user_id = ?
+  `).all(user_id);
+
+  res.status(200).json(updatedSI);
+});
+
+
 module.exports = router;
