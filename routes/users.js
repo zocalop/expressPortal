@@ -80,7 +80,7 @@ router.delete("/", (req, res) => {
 router.put("/si", (req, res) => {
   const user_id = req.user.user_id;
 
-  const si = req.body.si || [];
+  const si = req.body.stranger_inventory || [];
 
   db.prepare(`
     DELETE FROM stranger_inventory
@@ -112,5 +112,17 @@ router.put("/si", (req, res) => {
   res.status(200).json(updatedSI);
 });
 
+// GET request: Retrieve one user's Stranger Inventory
+router.get("/si", (req, res) => {
+  const user_id = req.user.user_id;
+
+  const si = db.prepare(`
+    SELECT product_name, quantity
+    FROM stranger_inventory
+    WHERE user_id = ?
+  `).all(user_id);
+
+  res.json(si);
+});
 
 module.exports = router;
