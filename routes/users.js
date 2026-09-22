@@ -80,7 +80,7 @@ router.delete("/", (req, res) => {
 router.put("/si", (req, res) => {
   const user_id = req.user.user_id;
 
-  const si = req.body.stranger_inventory || [];
+  const si = req.body.si || [];
 
   db.prepare(`
     DELETE FROM stranger_inventory
